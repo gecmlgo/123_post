@@ -1,25 +1,451 @@
 <!DOCTYPE html>
-<html lang="zh"><head>
+<html lang="zh">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="60">
-<title>爆款雷达 · 还在加载</title>
+<title>工作台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
-       background:#0a0d13;color:#e8e8ea;text-align:center;padding:24px;
-       font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
-  .spin{width:34px;height:34px;margin:0 auto 26px;border:3px solid #2a2f3a;
-        border-top-color:#ff785a;border-radius:50%;animation:s 1s linear infinite}
-  @keyframes s{to{transform:rotate(360deg)}}
-  h1{font-size:23px;margin:0 0 14px;font-weight:600}
-  p{margin:8px 0;color:#9a9aa2;font-size:15px;line-height:1.75}
-  .hint{margin-top:30px;font-size:13.5px;color:#6e6e78}
-  @media(prefers-reduced-motion:reduce){.spin{animation:none}}
-</style></head><body><div>
-  <div class="spin"></div>
-  <h1>你的页面还在加载中,请稍等</h1>
-  <p>第一次大约需要 20-60 分钟。</p>
-  <p>这一页会自己刷新,你可以先去忙别的。</p>
-  <p class="hint">等很久都没变?回到安装 SOP 第 7 步,<br>到仓库的 Actions 看 Sync Content 有没有跑完。</p>
-</div></body></html>
+  :root {
+    --bg:#0a0d13; --card:#11151d; --card-hi:#151a24; --border:#1d2430; --border-hi:#2c3546;
+    --text:#e8ecf3; --muted:#8a94a6; --faint:#5b6577; --accent:#5ea1ff; --green:#3fd68f;
+    --orange:#f0a33f; --pink:#ff6b9d; --red:#ff5c5c; --fire1:#ff8a3d; --fire2:#ff4d6d;
+    --font:'Inter',-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --disp:'Space Grotesk','Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font); -webkit-font-smoothing:antialiased; }
+  ::selection { background:rgba(94,161,255,.3); }
+  ::-webkit-scrollbar { width:10px; } ::-webkit-scrollbar-thumb { background:#232c3b; border-radius:8px; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
+  .ic { width:14px; height:14px; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; fill:none; flex:none; }
+
+  header { position:sticky; top:0; z-index:50; background:rgba(10,13,19,.86);
+    backdrop-filter:blur(14px); border-bottom:1px solid var(--border); padding:13px 20px; }
+  .hrow { display:flex; flex-wrap:wrap; gap:10px; align-items:center; max-width:1200px; margin:0 auto; }
+  .brand { display:flex; align-items:center; gap:10px; margin-right:auto; }
+  .mark { width:31px; height:31px; border-radius:9px; display:grid; place-items:center;
+    background:linear-gradient(135deg,var(--fire1),var(--fire2)); box-shadow:0 4px 16px rgba(255,92,80,.35); }
+  .mark .ic { width:17px; height:17px; color:#fff; }
+  h1 { font-family:var(--disp); font-size:16.5px; font-weight:700; line-height:1.15; }
+  h1 small { display:block; color:var(--faint); font-family:var(--font); font-weight:400; font-size:10.5px; }
+  .me { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); cursor:pointer;
+    background:var(--card); border:1px solid var(--border); border-radius:10px; padding:7px 12px;
+    transition:border-color .18s; }
+  .me:hover { border-color:var(--border-hi); }
+  .me b { color:var(--text); }
+
+  nav { display:flex; gap:7px; max-width:1200px; margin:12px auto 0; flex-wrap:wrap; }
+  .ntab { display:inline-flex; align-items:center; gap:7px; background:var(--card);
+    border:1px solid var(--border); border-radius:999px; padding:7px 16px; font-size:13.5px;
+    color:var(--muted); cursor:pointer; user-select:none; transition:all .18s; }
+  .ntab:hover { border-color:var(--border-hi); color:var(--text); }
+  .ntab.on { color:var(--text); background:linear-gradient(135deg,rgba(255,138,61,.15),rgba(255,77,109,.15));
+    border-color:rgba(255,120,90,.45); }
+
+  main { max-width:1200px; margin:22px auto; padding:0 20px; }
+  .page { display:none; } .page.on { display:block; }
+
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+  .stat { flex:1; min-width:130px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:14px 16px; }
+  .stat .v { font-family:var(--disp); font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .stat .l { color:var(--faint); font-size:12px; margin-top:2px; }
+  .stat.sh .v { color:var(--orange); } .stat.dn .v { color:var(--green); } .stat.pd .v { color:var(--accent); }
+
+  section { background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:16px 18px; margin-bottom:16px; }
+  section h2 { font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  section h2 .ic { color:var(--orange); }
+  section h2 small { color:var(--faint); font-weight:400; font-size:11.5px; margin-left:auto; }
+  .row { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--border);
+    font-size:13px; flex-wrap:wrap; }
+  .row .hookline { flex:1; min-width:200px; color:var(--text); overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; }
+  .row .hookline small { color:var(--faint); display:block; font-size:11px; margin-top:1px; }
+  .row .who2 { color:var(--accent); text-decoration:none; font-weight:600; font-size:12px; white-space:nowrap; }
+  .xb { font-family:var(--disp); font-weight:600; font-size:11px; color:var(--orange);
+    border:1px solid rgba(240,163,63,.4); background:rgba(240,163,63,.07); border-radius:99px;
+    padding:2px 8px; white-space:nowrap; }
+  .pill { display:inline-flex; align-items:center; gap:4px; background:#0c0f16; color:var(--muted);
+    border:1px solid var(--border); border-radius:9px; padding:5.5px 10px; font-size:11.5px;
+    cursor:pointer; text-decoration:none; font-family:var(--font); transition:all .18s; white-space:nowrap; }
+  .pill .ic { width:11px; height:11px; }
+  .pill:hover { color:var(--accent); border-color:rgba(94,161,255,.5); }
+  .pill.ok:hover { color:var(--green); border-color:rgba(63,214,143,.5); }
+  .pill.bad:hover { color:var(--red); border-color:rgba(255,92,92,.5); }
+  .none { color:var(--faint); font-size:13px; padding:14px 0 6px; }
+
+  .act { display:flex; gap:9px; padding:7px 0; border-top:1px solid var(--border);
+    font-size:12.5px; color:var(--muted); }
+  .act time { color:var(--faint); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .act b { color:var(--text); font-weight:600; }
+  .act .to { color:var(--orange); }
+
+  #radarWrap { height:calc(100vh - 150px); min-height:500px; border:1px solid var(--border);
+    border-radius:16px; overflow:hidden; }
+  #radarWrap iframe { width:100%; height:100%; border:0; }
+
+  .sop { max-width:820px; }
+  .sop h3 { font-size:15px; margin:22px 0 10px; display:flex; gap:8px; align-items:center; }
+  .sop h3 .ic { color:var(--orange); }
+  .sop ol { margin:0 0 8px 22px; color:var(--muted); font-size:13.5px; line-height:1.9; }
+  .sop ol b { color:var(--text); }
+  .sop p { color:var(--muted); font-size:13px; line-height:1.7; margin-bottom:6px; }
+  .sop table { border-collapse:collapse; font-size:13px; margin:8px 0; }
+  .sop td, .sop th { border:1px solid var(--border); padding:7px 14px; color:var(--muted); }
+  .sop th { color:var(--text); background:var(--card-hi); }
+
+  #mission { border:1px solid rgba(255,120,90,.35); border-radius:16px; padding:15px 18px;
+    margin-bottom:14px; background:linear-gradient(135deg,rgba(255,138,61,.10),rgba(255,77,109,.10)); }
+  #mission .mt { font-weight:600; font-size:14px; display:flex; gap:8px; align-items:center; }
+  #mission .mt .ic { color:var(--orange); }
+  #mission .md { color:var(--muted); font-size:12.5px; margin-top:5px; line-height:1.6; }
+  #mission .md b { color:var(--text); font-family:var(--disp); }
+  #overlay { position:fixed; inset:0; background:rgba(6,8,12,.88); backdrop-filter:blur(6px);
+    z-index:200; display:none; place-items:center; }
+  #overlay.show { display:grid; }
+  .obox { background:var(--card); border:1px solid var(--border-hi); border-radius:18px;
+    padding:28px 30px; width:min(92vw,380px); }
+  .obox h2 { font-family:var(--disp); font-size:18px; margin-bottom:6px; }
+  .obox p { color:var(--muted); font-size:13px; margin-bottom:16px; }
+  .obox input, .obox select { width:100%; background:#0c0f16; color:var(--text);
+    border:1px solid var(--border); border-radius:10px; padding:10px 13px; font-size:14px;
+    font-family:var(--font); margin-bottom:11px; }
+  .obox input:focus, .obox select:focus { border-color:var(--accent); outline:none; }
+  .obox button { width:100%; background:linear-gradient(135deg,var(--fire1),var(--fire2));
+    color:#fff; border:0; border-radius:10px; padding:11px; font-size:14px; font-weight:600;
+    font-family:var(--font); cursor:pointer; }
+  .obox button:active { transform:scale(.98); }
+
+  #toast { position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(8px);
+    background:var(--card-hi); border:1px solid var(--border-hi); border-radius:11px;
+    padding:11px 20px; font-size:13px; display:none; z-index:300; opacity:0;
+    box-shadow:0 12px 32px rgba(0,0,0,.5); transition:opacity .2s, transform .2s; }
+  #toast.show { display:block; opacity:1; transform:translateX(-50%) translateY(0); }
+  @media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+</head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><path d="m10 8 6 4-6 4Z"/><rect x="2" y="4" width="20" height="16" rx="3"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+  <symbol id="i-radar" viewBox="0 0 24 24"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+</svg>
+<header>
+  <div class="hrow">
+    <div class="brand">
+      <div class="mark"><svg class="ic"><use href="#i-flame"/></svg></div>
+      <h1>工作台<small id="updated"></small></h1>
+    </div>
+    <div class="me" id="meBtn" title="点击修改身份">
+      <svg class="ic"><use href="#i-user"/></svg><span id="meLabel">未登记</span>
+    </div>
+  </div>
+  <nav>
+    <div class="ntab on" data-p="work"><svg class="ic"><use href="#i-clock"/></svg>今日工作</div>
+    <div class="ntab" data-p="radar"><svg class="ic"><use href="#i-radar"/></svg>爆款雷达</div>
+    <div class="ntab" data-p="sop"><svg class="ic"><use href="#i-book"/></svg>SOP</div>
+  </nav>
+</header>
+<main>
+  <div class="page on" id="p-work">
+    <div id="mission"></div>
+    <div class="stats">
+      <div class="stat pd"><div class="v" id="stPending">–</div><div class="l">未处理(待挑选)</div></div>
+      <div class="stat sh"><div class="v" id="stShoot">–</div><div class="l">拍摄中</div></div>
+      <div class="stat dn"><div class="v" id="stDone">–</div><div class="l">已处理</div></div>
+    </div>
+    <section id="secShoot">
+      <h2><svg class="ic"><use href="#i-video"/></svg>拍摄中队列<small>做完一条,点「完成」</small></h2>
+      <div id="shootList"></div>
+    </section>
+    <section id="secPick">
+      <h2><svg class="ic"><use href="#i-flame"/></svg>本周待挑选爆款 Top 8<small>看中就点「选中拍摄」,细看去爆款雷达</small></h2>
+      <div id="pickList"></div>
+    </section>
+  </div>
+  <div class="page" id="p-radar"><div id="radarWrap"></div></div>
+  <div class="page sop" id="p-sop">
+    <section>
+      <h3><svg class="ic"><use href="#i-flame"/></svg>SOP-01 · Marketer 每周选题流程(周一,约30分钟)</h3>
+      <ol>
+        <li>打开<b>爆款雷达</b>,点快筛「<b>真爆款 ×2+</b>」+「<b>近7天</b>」</li>
+        <li>看「爆款热词」确认本周主题方向(热词越多的主题越优先)</li>
+        <li>挑 <b>3–5 条</b>适合改编的。标准:话题跟我们相关 / Hook 可复制 / 我们拍得出来</li>
+        <li>每条点「<b>Brief</b>」复制 → 发到拍摄群</li>
+        <li>把选中的卡片<b>拖到「拍摄中」</b></li>
+        <li>明显不适合的拖「跳过」,保持未处理越少越好</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-video"/></svg>SOP-02 · Content Creator 拍摄改编流程(每条 ≤1天)</h3>
+      <ol>
+        <li>打开工作台「<b>今日工作</b>」,看拍摄中队列,从最旧的开始</li>
+        <li>打开原帖看 <b>3 遍</b>:第1遍看整体 / 第2遍拆 Hook(前3秒为什么让人停下) / 第3遍记结构(几个镜头、什么节奏)</li>
+        <li><b>改编不照抄</b>:换成我们的案例、口吻、行业。保留结构,替换内容</li>
+        <li>拍摄 → 剪辑。<b>前3秒必须有钩子</b>,字幕开头即出</li>
+        <li>发布后回到工作台,该条点「<b>完成</b>」</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-book"/></svg>SOP-03 · 状态定义(团队统一语言)</h3>
+      <table>
+        <tr><th>状态</th><th>意思</th><th>谁负责改</th></tr>
+        <tr><td>未处理</td><td>还没人筛选过</td><td>Marketer 每周清理</td></tr>
+        <tr><td>拍摄中</td><td>已选中,正在改编/拍摄/剪辑</td><td>Marketer 选中时拖入</td></tr>
+        <tr><td>已处理</td><td>已发布或已完成改编</td><td>Creator 完成时点</td></tr>
+        <tr><td>跳过</td><td>不适合我们,不再考虑</td><td>任何人</td></tr>
+      </table>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-radar"/></svg>SOP-04 · 看到「引流」标签的帖子怎么学</h3>
+      <p>带「引流」标的帖子,重点<b>不是内容,是漏斗</b>。记录三件事:</p>
+      <ol>
+        <li>留言<b>关键词</b>是什么?(例:留言「Start」)</li>
+        <li>送的<b>诱饵</b>是什么?(模板 / 课程 / 清单)</li>
+        <li>之后导去<b>哪里</b>?(DM 自动回复 → 链接 → 报名页)</li>
+      </ol>
+      <p>好的打法直接抄结构,用我们的 GHL / ManyChat 实现。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-05 · 竞对名单管理(发现好账号就加进来)</h3>
+      <ol>
+        <li>打开 Supabase「<b>competitors</b>」表,加一行</li>
+        <li><b>Username</b>:贴账号名或 IG <b>主页</b>链接都行(带 ?igsh= 参数没关系;不要贴帖子链接)</li>
+        <li><b>Tracker</b>:选 IG Competitors 或 AI Competitors</li>
+        <li><b>Active</b>:打勾✅ — <b>没勾不会抓</b></li>
+        <li>每周一自动生效;停止追踪 = 取消勾,不用删行</li>
+      </ol>
+      <p>加账号的标准:跟我们领域相关 / 内容有爆款相 / 值得学。发现雷达里某账号长期没爆款,把它 Active 取消,腾出额度换新的。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-06 · 第一次设置 & 常见问题</h3>
+      <ol>
+        <li><b>登记身份:</b>第一次打开工作台会弹「你是谁」→ 输名字、选角色。这决定你看到的任务卡和排版</li>
+        <li><b>直接改状态:</b>雷达里把卡片拖到上方分类,或用卡片下拉选。看到绿色 ✓ 就成了。<b>不需要输任何密钥</b> —— 这套系统天生只允许改状态,改不了别的数据,所以安全无需登录</li>
+      </ol>
+      <p><b>常见问题:</b></p>
+      <table>
+        <tr><th>现象</th><th>原因</th><th>解决</th></tr>
+        <tr><td>改了状态没反应 / 报错</td><td>网络断了,或页面是旧版</td><td>刷新页面(Ctrl+Shift+R)再试</td></tr>
+        <tr><td>队友改的状态我看不到</td><td>页面最多 10 分钟同步一次</td><td>刷新页面即可;自己的改动是即时的</td></tr>
+        <tr><td>网页打不开 / 数据是空的</td><td>每周自动更新那天可能还在跑</td><td>等 1 小时后再开;还不行找老板看 GitHub Actions</td></tr>
+      </table>
+      <p>状态存在云端(Supabase),换电脑、关机都不会丢,全团队实时共享。</p>
+    </section>
+  </div>
+</main>
+<div id="overlay"><div class="obox">
+  <h2>👋 你是谁?</h2>
+  <p>登记一次,方便团队知道是谁在操作。</p>
+  <input id="oName" placeholder="你的名字" maxlength="20">
+  <select id="oRole">
+    <option value="Marketer">Marketer(选题/投放)</option>
+    <option value="Content Creator">Content Creator(拍摄/剪辑)</option>
+    <option value="Boss">Boss</option>
+  </select>
+  <button id="oSave">进入工作台</button>
+</div></div>
+<div id="toast"></div>
+<script id="data" type="application/json">[{"id": "DfWcjQCzJta", "tracker": "Child Specialist 竞对", "competitor": "dr.kenneth.looi", "caption": "​🎒 ONE DAY WITHOUT SCHOOL BAGS? YES, PLEASE! 😍🙌\n\n​Dear family and friends,\n\n​Carlson is participating in the FASIH KPM 2026 Competition, and we would love your support! ❤️\n\n​💡 His big idea? “One Bag-Free Day Every Month!”\n\n​Imagine a school day without heavy bags, where children can put aside their textbooks and learn through hands-on activities, experiments, creativity and real-life experiences! 🌱🔬🎨\n\n​Carlson believes that learning doesn’t always have to come from books. Sometimes, the best lessons come from doing! 💡\n\n​His little wish is that one day, our Minister of Education will hear his voice and perhaps turn this idea into reality for students across the country! 🤭❤️\n\n​❤️ HOW TO SUPPORT CARLSON:\n\n​👉 STEP 1: Click the link in our bio to go directly to the school’s Facebook page.\n\n👉 STEP 2: Press LIKE ❤️ on the ORIGINAL VIDEO.\n\n👉 STEP 3: SHARE the video and encourage your friends to do the same!\n\n​Every like and share means so much to him, and hopefully, his little voice can reach ", "transcript": "Wah, legerasa ni apabila daripada tak tak ni. Sudahlah bahuleng oh, odak kita pun kadang-kadang rasa tepuh sebab susah nak kahvong semua isi buku ini. Selamat sedih teradam Salam Adani. Saya Karlsen LeRach Wendari SDKC Bokeh Fraser. Anda saya menteri pendirikan saya akan memperkenalkan satu dasar istimewa sehari tanpa back sekolah. Tinggalkan back sekolah yang berat ini di rumah dan kita belajar secara praktikal. Masih kahwankawan tertanya-tanya? Macam mana tu? Haa, jom kita bayangkan. Waktu subjek bahasa kita jadi wartawan ciling dan temurah makawangkawan di sekolah. Belajar matematik mari kita buka kedai mini, jual makanan dan kira sendiri untuk rugi. Waktu sains? Jom keluar dari kelas, terlokal alam sekitar dan buat eksperimen betul-betul. Dan untuk mendirikan moral tak perlu hafal buku. Kita berkotong royong dan buat kerja amal bersama-sama. Terus itulah kita belajar Erti Isan dan Salimung Khumati. Jika saya minta dipendirikan saya berjanji ilmu kita akan sentiasa terbang tinggi menggapai di langit. Namun budi pekerja kita tetap tegur mengakar di bumi. Sekian terima kasih.", "brk": "Hook类型: 痛点直击\n结构: 痛点引入 → 孩子提案 → 具体场景 → 呼吁行动\n为什么火: 直击书包过重痛点，童言无忌引发家长广泛共鸣与转发\n改编角度: 聚焦儿童脊椎健康与书包超重危害，呼吁家长关注科学发育", "my": "Kuala Lumpur 的家长，孩子最近体重一直在增加，但身高真的长得好吗？\n很多家长看到孩子体重上升，就觉得营养充足，长得一定很健康。\n但实际上，孩子的成长不仅仅是体重计上的一个数字。\n我们要关注的其实是四个重要方面。\n第一是身高，孩子的身高有没有随着年龄稳定地增加。\n第二是成长趋势，对比长期的身高和体重，比单单看一次测量更有参考价值。\n第三是营养，孩子有没有摄取到健康成长所需的均衡营养。\n第四是发展里程碑，孩子的语言、动作、学习和社交能力，是不是符合这个年龄的进度。\n每个孩子的成长节奏都不一样。\n重一点不代表一定更健康，长得慢一点也不代表一定有问题。\n以前我们总是盯着数字看，担心孩子是不是落后了别人。\n现在我们通过定期的儿童专科评估，了解孩子的整体成长情况和个别需求。\n如果您也想了解孩子的发育状况，欢迎直接 WhatsApp 我们，预约一次个性化的儿科咨询。\nEvery Child Is Different. Every Child Deserves Personalised Care.", "tags": "", "bait": false, "type": "Video", "likes": 29, "comments": 5, "er": 3.13, "followers": 1085, "date": "2026-11-05", "url": "https://www.instagram.com/p/DfWcjQCzJta/", "video": true, "ratio": 0, "score": 4.06, "status": "未处理", "x": 0}, {"id": "De1uYWjIMrq", "tracker": "Child Specialist 竞对", "competitor": "doctorpaulchen", "caption": "<<每次小朋友吸鼻子都像在打仗!!3個步驟快速完成>>\n診間日常系列--\n常常在診間我遇到小朋友要抽鼻涕或採檢\n都會像玩\"老鷹捉小雞\"\n抓都抓不住\n\n採檢過程中也很常因為小朋友扭來扭去\n導致鼻黏膜有受傷\n這邊給大家一個\"固定小朋友\"的小技巧\n除了減少檢查的時間之外\n也可以減少小朋友的\"不舒服\"喔\n\n#診間日常 #診間戰場 #吸鼻涕 #兒科醫師", "transcript": "在診所我們常遇到一種狀況小朋友要細比踢或是做產品的時候一直很抗拒的扭來扭去所以這樣子很危險而且很容易受傷我們來教家屬一個固定的方式讓小朋友可以減少不適感第一個讓他小朋友坐在你的大腿上然後用你的雙腳夾住他的大腿第二個用右手固定他的雙手第三個用左手固定他的頭部輕輕的往上抬只要你用這個方式把它夾緊固定的話小朋友基本上不太會亂動減少過程中的不適感而且可以加速我們在檢查跟治療的過程所以用這個方式可以讓小朋友更舒服更安心快速做完檢查這樣子家長也可以更放心大家都可以試試看喔", "brk": "Hook类型: 痛点直击\n结构: 呈现诊间乱象 → 给出3步固定法 → 强调安全高效\n为什么火: 精准切中家长带娃吸鼻涕/看诊的日常崩溃痛点，提供即学即用的实用干货。\n改编角度: 针对儿童常见病护理，演示居家安全吸鼻涕或喂药的黄金3步法，降低育儿焦虑。", "my": "每次小朋友看医生吸鼻涕都像在打仗吗？\n\n很多家长觉得，孩子生病时抗拒检查是没办法的事，只能全家人一起用力死死按住他。\n\n其实不是，用对固定方法，不仅不会弄伤孩子，还能让检查快很多。\n\n第一步，让小朋友坐在你的大腿上。然后用你的双腿轻轻夹住他的大腿。这样能防止孩子突然踢腿挣扎。\n\n第二步，用右手固定他的双手。把两只手轻轻收在身侧。这样能避免孩子挥手打到医疗器械。\n\n第三步，用左手固定他的头部轻轻往上抬。配合医生的动作。只要用这个方式固定好，小朋友基本上不太会乱动。\n\n以前在诊所，小朋友一看到吸鼻涕或做检查就哭闹扭动，家长在一旁心疼又着急，还容易因为乱动导致鼻黏膜受伤。\n\n用对了固定方式之后，整个过程变得非常快。小朋友减少了不适感，也更加安心，家长看着也更放心。\n\n如果您家宝贝最近也有咳嗽、发烧或者需要做检查的情况，欢迎随时 WhatsApp 我们预约儿科专科诊疗。\n\nEvery Child Is Different. Every Child Deserves Personalised Care.", "tags": "診間日常, 診間戰場, 吸鼻涕, 兒科醫師", "bait": false, "type": "Video", "likes": 25, "comments": 0, "er": 3.75, "followers": 667, "date": "2026-10-23", "url": "https://www.instagram.com/p/De1uYWjIMrq/", "video": true, "ratio": 0, "score": 3.75, "status": "未处理", "x": 2.1}, {"id": "DdRTZ-sGQXh", "tracker": "Child Specialist 竞对", "competitor": "doctorpaulchen", "caption": "📍正確血壓怎麼量??722法則量出正確血壓📍\n是不是每次去診所和醫院\n本來沒有高血壓\n結果每次去血壓都超標?!🧐\n\n但是這不是真正的血壓喔!\n正確血壓建議是在\"家裡測量\"\n而且要連續測量才會精準\n遵守以下\"722\"法則👍\n連續\"7\"天，早上\"2\"次，晚上\"2\"次\n量完到診所給我們看\n我們才能幫你判斷你是不是有高血壓喔!!\n\n好好量血壓，才能讓你的身體真正維持健康🙂👍\n\n#722法則 #白袍症候群 #高血壓 #正確量血壓 #生活醫學 #高雄醫師 #心臟科", "transcript": "喔水量怎麼那麼夠啊潘醫師你屏長有沒有在量血壓屏長不會每天量血壓吧對啦 通常就是頭不舒服是到診所的時候才會去量跟大家稍微提示一下現在有一個很特別叫722722喔對 什麼叫722聽起來好像很厲害執行起來蠻簡單的連續量七天早上兩次 晚上兩次就是722的意思為什麼會早上兩次 晚上兩次因為通常量血壓的時候第一次量可能都比較高個五到十分鐘休息一下再量第二次 取平均子這樣子比較準量血壓都會檢疫在家裡面量好有聽過白袍症候群嗎善到醫生就緊張對啊 在診所或是看到醫生的白袍就說喔水量怎麼那麼夠啊本來沒有高血壓的你只要在診所量都是破100%基本上如果你在130%以上就是算有點偏高血壓的情況假設你真的量到了18200那你絕對不正常", "brk": "Hook类型: 痛点直击\n结构: 诊所血压高误区 → 给出722法则 → 强调居家测量重要性\n为什么火: 戳中大众“白袍高血压”痛点，给出了具体易记的量化标准。\n改编角度: 针对儿童健康，改成如何在家准确测量宝宝体温或评估生长发育指标。", "my": "各位吉隆坡的爸爸妈妈\n是不是每次带孩子来诊所\n本来在家好好的\n一到这里量体重就觉得怪怪的\n以为孩子是不是长胖了\n\n很多家长觉得\n只要孩子体重变重\n就代表他们长得很好\n其实孩子的成长\n远远不只是秤上的一个数字\n\n一个比较重的孩子\n不一定代表更健康\n而比其他孩子长得慢一些\n也不代表一定有什么问题\n\n我们要看的是\n孩子的整体成长模式\n还有个人的发育需求\n这里有四个关键的健康指标\n你可以带孩子来做个评估\n\n第一是身高\n看看孩子的身高\n是不是随着年龄在稳定增加\n第二是成长趋势\n追踪一段时间的身高和体重\n比单单量一次更有参考价值\n第三是营养\n看看孩子有没有摄取到\n健康成长需要的均衡营养\n\n第四是发展里程碑\n孩子的语言、动作\n还有社交能力\n是不是符合这个年纪的表现\n每个孩子的成长节奏都不一样\n\n以前很多家长\n看到孩子体重增加就放心\n其实忽略了身高和发育\n现在我们可以带孩子来做\n个性化的成长和发育评估\n通过详细的检查\n了解孩子的整体情况\n\n如果您想知道\n孩子的发育和成长好不好\n可以私信我们\n了解适合的专科评估安排\n123 Child Specialist Clinic\nEvery Child Is Different. Every Child Deserves Personalised Care.", "tags": "722法則, 白袍症候群, 高血壓, 正確量血壓, 生活醫學, 高雄醫師, 心臟科", "bait": false, "type": "Video", "likes": 12, "comments": 0, "er": 1.8, "followers": 667, "date": "2026-09-14", "url": "https://www.instagram.com/p/DdRTZ-sGQXh/", "video": true, "ratio": 0, "score": 1.8, "status": "未处理", "x": 1.0}, {"id": "DdX1104E1JE", "tracker": "Child Specialist 竞对", "competitor": "doctorpaulchen", "caption": "【心肌梗塞沒有胸痛，也可能正在發生】\n\n很多人以為心肌梗塞一定是「劇烈胸痛」。\n\n事實上，胸部不適仍是最常見症狀，但部分患者可能只出現：\n\n⚠️突然喘不過氣\n⚠️冒冷汗、噁心或嘔吐\n⚠️上腹悶痛，像胃不舒服\n⚠️肩膀、背部、手臂或下顎不適\n⚠️頭暈、昏厥、異常虛弱\n⚠️無法解釋的強烈疲倦\n\n一項超過114萬人的心肌梗塞登錄研究顯示，未出現胸痛或胸部不適的患者，女性約42.0%、男性約30.7%。\n\n但這組數字不能解讀成「女性通常不會胸痛」：\n\n✅ 胸痛仍是男女最常見的症狀\n✅ 女性較常同時出現噁心、喘或心悸\n✅ 高齡、糖尿病或慢性腎臟病患者，也可能沒有明顯胸痛\n✅ 沒有胸痛，不代表心肌受損比較輕\n\n現在的心臟學指引逐漸不使用「非典型症狀」，而稱為「胸痛等同症狀」。\n\n因為「不典型」不等於不重要。\n\n如果胸悶、胸痛或突然喘，合併冒冷汗、噁心、臉色蒼白、暈厥或極度虛弱：\n\n📞立即撥打119\n🚫不要自行開車\n🚫不要因為症狀暫時緩解而繼續觀察\n🚫不要只吃胃藥後等待\n\n心肌梗塞必須透過心電圖、心肌旋轉蛋白及臨床評估判斷，不能只靠症狀自行排除。\n\n時間就是心肌，及早辨識與送醫，才有機會減少心肌壞死。\n\n陳品宏醫師｜小兒科／心臟專科\n把複雜的醫學，帶入簡單的生活。\n\n本文為一般醫療衛教，不能取代個別診療。\n\n#心肌梗塞 #心肌梗塞症狀 #急性心肌梗塞 #胸痛 #胸悶 #冒冷汗 #呼吸困難 #心血管疾病 #健康衛教 #保羅醫師", "transcript": "", "brk": "Hook类型: 反常识\n结构: 常见误区纠正 → 隐藏危险信号 → 数据与专业解析 → 急救行动指南\n为什么火: 打破大众对心肌梗塞只有胸痛的认知，提供极具价值的急救干预知识。\n改编角度: 盘点儿童常见病中容易被家长忽视的非典型危险信号及正确应对策略。", "my": "很多家长以为，孩子发烧咳嗽，吃点退烧药休息一下就好了。\n事实上，发烧咳嗽最常见，但部分孩子生病时，可能只出现完全不一样的表现。\n很多家长以为，只要没有发烧，或者没有明显的咳嗽，孩子就肯定没有生病。\n但事實上，孩子生病不只是看表面这些。\n家长常常忽略的其他警讯，其实藏在日常的细节里。\n第一，孩子突然变得非常嗜睡、低能量，叫不太醒。\n这时候很多家长以为只是玩累了，其实可能是身体正在发出求救信号。\n第二，孩子持续无法进食或饮水，连平时最爱喝的水都喝不下。\n这会直接影响孩子的状态，千万不要拖到情况变严重才来处理。\n第三，孩子出现呼吸困难，或者呼吸时胸口起伏跟平时不一样。\n这时候如果只当成普通感冒处理，可能会错过及时评估的时机。\n以前很多家长遇到孩子生病，总是习惯先观察几天，或者随便吃点药等它过去。\n用对了方法以后，家长会带孩子来找儿科医生进行评估，了解孩子的症状、病程及整体情况。\n如果你也担心孩子的状况，现在就把孩子的年龄告诉我们。\n您可以直接发信息给我们，我们协助您了解适合的安排及费用。", "tags": "心肌梗塞, 心肌梗塞症狀, 急性心肌梗塞, 胸痛, 胸悶, 冒冷汗, 呼吸困難, 心血管疾病, 健康衛教, 保羅醫師", "bait": false, "type": "Image", "likes": 11, "comments": 0, "er": 1.65, "followers": 667, "date": "2026-09-17", "url": "https://www.instagram.com/p/DdX1104E1JE/", "video": false, "ratio": 0, "score": 1.65, "status": "未处理", "x": 0.9}]</script>
+<script>
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const SUPA = 'https://xlvaqxwqvnczzsvadidz.supabase.co';
+const ANON = 'sb_publishable_3dMgHzK6wnPKTsbEeR4l-A_Wd_8r-k9';
+document.getElementById('updated').textContent = '数据更新于 2026-11-13 11:39 (GMT+8)';
+
+const $ = id => document.getElementById(id);
+const I = n => '<svg class="ic"><use href="#i-' + n + '"/></svg>';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : String(n);
+const getKey = () => ANON;  // anon key is baked in — safe, can only change status
+const firstLine = c => ((c || '').split('\n').map(l => l.trim()).filter(Boolean)[0] || '(无文案)');
+const byRec = {}; DATA.forEach(d => byRec[d.id] = d);
+
+function toast(msg, ok) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  t.style.borderColor = ok ? 'var(--green)' : 'var(--red)';
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ---- mission card ----
+function renderMission() {
+  const role = localStorage.getItem('tm_role') || '';
+  const name = localStorage.getItem('tm_name') || '';
+  const pend = DATA.filter(d => d.status === '未处理').length;
+  const hot = DATA.filter(d => d.status === '未处理' && (d.x || 0) >= 2).length;
+  const queue = DATA.filter(d => d.status === '拍摄中').length;
+  const done = DATA.filter(d => d.status === '已处理').length;
+  const m = $('mission');
+  if (role === 'Marketer') {
+    m.innerHTML = '<div class="mt">' + I('flame') + esc(name) + ',任务:从待挑选里选出值得拍的</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条(其中真爆款 ×2+ 有 <b>' + hot + '</b> 条)'
+      + ' · 从下面清单直接选,或去雷达细看</div>';
+  } else if (role === 'Content Creator') {
+    m.innerHTML = '<div class="mt">' + I('video') + esc(name) + ',任务:清空拍摄中队列</div>'
+      + '<div class="md">队列还有 <b>' + queue + '</b> 条待做 · 已完成共 <b>' + done + '</b> 条</div>';
+  } else {
+    m.innerHTML = '<div class="mt">' + I('flame') + '团队概览</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条 · 拍摄中 <b>' + queue + '</b> 条 · 已完成 <b>' + done + '</b> 条</div>';
+  }
+}
+
+function orderSections() {
+  // Marketer sees picks first; Creator sees shooting queue first
+  if ((localStorage.getItem('tm_role') || '') === 'Marketer') {
+    $('secShoot').parentNode.insertBefore($('secPick'), $('secShoot'));
+  } else {
+    $('secPick').parentNode.insertBefore($('secShoot'), $('secPick'));
+  }
+}
+
+// ---- identity ----
+function meLabel() {
+  const n = localStorage.getItem('tm_name'), r = localStorage.getItem('tm_role');
+  $('meLabel').innerHTML = n ? '<b>' + esc(n) + '</b>&nbsp;· ' + esc(r || '') : '未登记';
+}
+function showOverlay() {
+  $('oName').value = localStorage.getItem('tm_name') || '';
+  $('oRole').value = localStorage.getItem('tm_role') || 'Marketer';
+  $('overlay').classList.add('show');
+}
+$('oSave').onclick = () => {
+  const n = $('oName').value.trim();
+  if (!n) { $('oName').focus(); return; }
+  localStorage.setItem('tm_name', n);
+  localStorage.setItem('tm_role', $('oRole').value);
+  $('overlay').classList.remove('show');
+  meLabel(); orderSections(); renderMission();
+  refreshStatuses();
+};
+$('meBtn').onclick = showOverlay;
+meLabel();
+if (!localStorage.getItem('tm_name')) showOverlay();
+
+// ---- tabs ----
+document.querySelectorAll('.ntab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.ntab').forEach(x => x.classList.toggle('on', x === t));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'p-' + t.dataset.p));
+  if (t.dataset.p === 'radar' && !$('radarWrap').querySelector('iframe')) {
+    const f = document.createElement('iframe'); f.src = 'index.html'; $('radarWrap').appendChild(f);
+  }
+});
+
+// ---- status write ----
+async function setStatus(d, val) {
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?post_id=eq.' + encodeURIComponent(d.id), {
+      method: 'PATCH',
+      headers: { 'apikey': ANON, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status: val })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    d.status = val;
+    cacheStatus(d.id, val);
+    toast('✓ @' + d.competitor + ' → ' + val, true);
+  } catch (e) {
+    toast('失败: ' + e.message, false);
+  }
+  renderWork();
+}
+
+// ---- 今日工作 ----
+function pillBtn(cls, icon, label) {
+  return '<button class="pill ' + cls + '">' + I(icon) + label + '</button>';
+}
+
+function renderWork() {
+  const pend = DATA.filter(d => d.status === '未处理');
+  const shoot = DATA.filter(d => d.status === '拍摄中');
+  const done = DATA.filter(d => d.status === '已处理');
+  $('stPending').textContent = pend.length;
+  $('stShoot').textContent = shoot.length;
+  $('stDone').textContent = done.length;
+
+  // shooting queue
+  const sl = $('shootList'); sl.innerHTML = '';
+  if (!shoot.length) sl.innerHTML = '<div class="none">队列是空的 — Marketer 去爆款雷达挑几条拖进「拍摄中」</div>';
+  shoot.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + ((d.x || 0) >= 2 ? '<span class="xb">×' + d.x + '</span>' : '')
+      + '<span class="hookline">' + esc(firstLine(d.caption)) + '</span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'check', '完成') + pillBtn('bad', 'x', '退回');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '已处理');
+    btns[1].onclick = () => setStatus(d, '未处理');
+    sl.appendChild(r);
+  });
+
+  // picks
+  const picks = pend.filter(d => (d.x || 0) >= 2).sort((a, b) => (b.x || 0) - (a.x || 0)).slice(0, 8);
+  const pl = $('pickList'); pl.innerHTML = '';
+  if (!picks.length) pl.innerHTML = '<div class="none">暂时没有 ×2 以上的未处理爆款 — 等周一自动抓新数据</div>';
+  picks.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<span class="xb">×' + d.x + '</span>'
+      + '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + '<span class="hookline">' + esc(firstLine(d.caption))
+      + '<small>🔥' + d.score + ' · ER ' + d.er + '% · 💬' + fmt(d.comments) + '</small></span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'video', '选中拍摄') + pillBtn('bad', 'x', '跳过');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '拍摄中');
+    btns[1].onclick = () => setStatus(d, '跳过');
+    pl.appendChild(r);
+  });
+  renderMission();
+}
+
+function applyStatusCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    Object.keys(c).forEach(rid => { const d = byRec[rid]; if (d) d.status = c[rid]; });
+  } catch (e) {}
+}
+
+function cacheStatus(rid, val) {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    c[rid] = val; localStorage.setItem('st_cache', JSON.stringify(c));
+  } catch (e) {}
+}
+
+// ---- live statuses from Supabase ----
+async function refreshStatuses() {
+  applyStatusCache(); renderWork();  // last-known statuses first
+  if (Date.now() - (+localStorage.getItem('st_ts') || 0) < 600000) return;  // 10-min throttle
+  localStorage.setItem('st_ts', String(Date.now()));
+  const fresh = {};
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?select=post_id,status', { headers: { 'apikey': ANON } });
+    if (!r.ok) return;
+    (await r.json()).forEach(row => {
+      const d = byRec[row.post_id];
+      if (d) d.status = row.status || '未处理';
+      if (row.status && row.status !== '未处理') fresh[row.post_id] = row.status;
+    });
+    localStorage.setItem('st_cache', JSON.stringify(fresh));
+    renderWork();
+  } catch (e) {}
+}
+
+orderSections();
+renderMission();
+renderWork();
+refreshStatuses();
+</script>
+</body>
+</html>
